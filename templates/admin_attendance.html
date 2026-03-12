@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+    <h1>Attendance Records</h1>
+    <form method="get" class="form inline-form">
+        <label>Date
+            <input type="date" name="date" value="{{ selected_date }}">
+        </label>
+        <button type="submit" class="btn secondary">Filter</button>
+    </form>
+</section>
+
+<section class="card">
+    {% if records %}
+        <table>
+            <thead>
+            <tr>
+                <th>Student</th>
+                <th>Email</th>
+                <th>Session</th>
+                <th>Marked At</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for r in records %}
+                <tr>
+                    <td>{{ r.user.name }}</td>
+                    <td>{{ r.user.email }}</td>
+                    <td>{{ r.session.title }}</td>
+                    <td>{{ r.timestamp.strftime("%Y-%m-%d %H:%M") }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No attendance records for this selection.</p>
+    {% endif %}
+</section>
+{% endblock %}
+

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+    <h1>Session: {{ session_obj.title }}</h1>
+    <p>
+        Created at: {{ session_obj.created_at.strftime("%Y-%m-%d %H:%M") }}<br>
+        Expires at: {{ session_obj.expires_at.strftime("%Y-%m-%d %H:%M") }}
+    </p>
+    <div class="qr-section">
+        <h2>QR Code</h2>
+        <p>Display this QR on the projector or share with students.</p>
+        <img src="{{ url_for('session_qr', session_id=session_obj.id) }}" alt="QR Code for attendance">
+        <p class="helper-text small">
+            Students scan this QR and login; their attendance is recorded automatically.
+        </p>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Attendees</h2>
+    {% if attendees %}
+        <table>
+            <thead>
+            <tr>
+                <th>Student</th>
+                <th>Email</th>
+                <th>Marked At</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for a in attendees %}
+                <tr>
+                    <td>{{ a.user.name }}</td>
+                    <td>{{ a.user.email }}</td>
+                    <td>{{ a.timestamp.strftime("%Y-%m-%d %H:%M") }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No students have marked attendance yet.</p>
+    {% endif %}
+</section>
+{% endblock %}
+

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+    <h1>Face Recognition Attendance (Demo)</h1>
+    <p>
+        In a production system, this page would access your webcam, capture your face,
+        and send it to the server to be compared with your enrolled face template.
+    </p>
+    <p>
+        For now, this demo simply marks attendance for the latest active session when you click the button.
+    </p>
+    <form method="post">
+        <button type="submit" class="btn primary">Mark Attendance with Face Recognition (Demo)</button>
+    </form>
+</section>
+{% endblock %}
+

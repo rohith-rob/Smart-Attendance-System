@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+    <h1>Attendance Report</h1>
+    <p>
+        Overview of all students vs. all sessions.
+        A filled cell means the student was present.
+    </p>
+</section>
+
+<section class="card">
+    {% if students and sessions %}
+        <div class="table-wrapper horizontal-scroll">
+            <table class="matrix">
+                <thead>
+                <tr>
+                    <th>Student</th>
+                    {% for s in sessions %}
+                        <th title="{{ s.title }} ({{ s.created_at.strftime('%Y-%m-%d') }})">
+                            {{ loop.index }}
+                        </th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for st in students %}
+                    <tr>
+                        <td>{{ st.name }}</td>
+                        {% for s in sessions %}
+                            {% if attendance_map.get((st.id, s.id)) %}
+                                <td class="present">✔</td>
+                            {% else %}
+                                <td class="absent">–</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No data yet to build a report.</p>
+    {% endif %}
+</section>
+{% endblock %}
+

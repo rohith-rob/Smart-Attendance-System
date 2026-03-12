@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="grid two-col">
+    <div class="card">
+        <h1>Admin Dashboard</h1>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Students</span>
+                <span class="stat-value">{{ total_students }}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Sessions</span>
+                <span class="stat-value">{{ total_sessions }}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Attendance Records</span>
+                <span class="stat-value">{{ total_attendance }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Create New Attendance Session</h2>
+        <form method="post" action="{{ url_for('create_session') }}" class="form">
+            <label>Title
+                <input type="text" name="title" placeholder="e.g. BSc CS - DBMS" required>
+            </label>
+            <label>Valid for (minutes)
+                <input type="number" name="duration" value="15" min="1" max="120" required>
+            </label>
+            <button type="submit" class="btn primary">Create &amp; Generate QR</button>
+        </form>
+        <p class="helper-text small">
+            After creating, open the session details to display the QR code on screen or share with students.
+        </p>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Recent Sessions</h2>
+    {% if recent_sessions %}
+        <table>
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Created</th>
+                <th>Expires</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for s in recent_sessions %}
+                <tr>
+                    <td>{{ s.title }}</td>
+                    <td>{{ s.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                    <td>{{ s.expires_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                    <td><a class="btn small" href="{{ url_for('view_session', session_id=s.id) }}">View</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No sessions yet. Create one above.</p>
+    {% endif %}
+
+    <div class="actions-row">
+        <a href="{{ url_for('admin_attendance') }}" class="btn secondary">View Attendance Records</a>
+        <a href="{{ url_for('admin_report') }}" class="btn secondary">Attendance Report</a>
+    </div>
+</section>
+{% endblock %}
+
