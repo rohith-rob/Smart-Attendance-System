@@ -1,3 +1,4 @@
+import json
 import os
 import secrets
 from datetime import datetime, timedelta
@@ -10,6 +11,7 @@ import qrcode
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(BASE_DIR, "attendance.db")
+DEBUG_LOG_PATH = os.path.join(BASE_DIR, "debug-42b1ff.log")
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
@@ -51,19 +53,54 @@ class Attendance(db.Model):
     session = db.relationship("AttendanceSession")
 
 
+def _debug_log(run_id: str, hypothesis_id: str, location: str, message: str, data=None) -> None:
+    """Lightweight JSON logger for debug session 42b1ff."""
+    payload = {
+        "sessionId": "42b1ff",
+        "runId": run_id,
+        "hypothesisId": hypothesis_id,
+        "location": location,
+        "message": message,
+        "data": data or {},
+        "timestamp": int(datetime.utcnow().timestamp() * 1000),
+    }
+    try:
+        with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(payload) + "\n")
+    except Exception:
+        # Logging must never break the app
+        pass
+
+
 def init_db():
+    # #region agent log
+    _debug_log("pre-fix", "H1", "app.py:54", "init_db called", {})
+    # #endregion
+
     db.create_all()
+
     # Create a default admin if not present
+    created_admin = False
     if not User.query.filter_by(email="admin@example.com").first():
         admin = User(name="Admin", email="admin@example.com", role="admin")
         admin.set_password("admin123")
         db.session.add(admin)
         db.session.commit()
+        created_admin = True
+
+    # #region agent log
+    _debug_log(
+        "pre-fix",
+        "H1",
+        "app.py:61",
+        "init_db completed",
+        {"created_admin": created_admin},
+    )
+    # #endregion
 
 
-@app.before_first_request
-def setup():
-    init_db()
+# Removed @app.before_first_request as it is deprecated in Flask 3.0+
+# Instead, we will initialize the database within the app context below.
 
 
 def current_user():
@@ -90,6 +127,28 @@ def login_required(role=None):
         return wrapper
 
     return decorator
+
+
+@app.errorhandler(Exception)
+def handle_unexpected_error(e):
+    """Global error handler to capture unexpected exceptions for debugging."""
+    # #region agent log
+    try:
+        _debug_log(
+            "pre-fix",
+            "H3",
+            "app.py:104",
+            "Unhandled exception",
+            {
+                "type": type(e).__name__,
+                "path": request.path if request else None,
+            },
+        )
+    except Exception:
+        # If logging fails, we still want the original error
+        pass
+    # #endregion
+    raise e
 
 
 @app.route("/")
@@ -322,5 +381,16 @@ def admin_report():
 
 
 if __name__ == "__main__":
+    # #region agent log
+    _debug_log("pre-fix", "H1", "app.py:323", "__main__ entry", {})
+    # #endregion
+
+    with app.app_context():
+        init_db()
+
+    # #region agent log
+    _debug_log("pre-fix", "H1", "app.py:326", "after init_db", {})
+    # #endregion
+
     app.run(debug=True)
 
